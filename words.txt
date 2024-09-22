@@ -1,4 +1,10 @@
-hello|привет|
-dog|собака|0
-cat|кошка|1
-thank you|спасибо|2
+people|люди|0
+family|семья|0
+woman|женщина|1
+man|мужчина|1
+girl|девочка|2
+boy|мальчик|2
+child|ребёнок|3
+friend|друг|3
+husband|муж|4
+wife|жена|4

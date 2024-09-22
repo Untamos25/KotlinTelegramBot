@@ -1,5 +1,7 @@
 import java.io.File
 
+private const val NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD = 3
+
 data class Word(
     val original: String,
     val translate: String,
@@ -29,7 +31,13 @@ fun main() {
         val input = readln().toIntOrNull()
         when (input) {
             1 -> println("Вы выбрали 1 - Учить слова")
-            2 -> println("Вы выбрали 2 - Статистика")
+            2 -> {
+                val numberOfLearnedWords =
+                    dictionary.filter { it.correctAnswersCount >= NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
+                val percentOfLearnedWords = (numberOfLearnedWords.size.toDouble() / dictionary.size * 100).toInt()
+                println("Выучено ${numberOfLearnedWords.size} из ${dictionary.size} | $percentOfLearnedWords%")
+            }
+
             0 -> break
             else -> println("Пожалуйста, укажите номер действия, которое вы хотите выполнить")
         }
