@@ -18,8 +18,20 @@ fun main() {
         dictionary.add(word)
     }
 
-    dictionary.forEach {
-        println(it)
+    while (true) {
+        println(
+            """Меню:
+        |1 - Учить слова
+        |2 - Статистика
+        |0 - Выход
+    """.trimMargin()
+        )
+        val input = readln().toIntOrNull()
+        when (input) {
+            1 -> println("Вы выбрали 1 - Учить слова")
+            2 -> println("Вы выбрали 2 - Статистика")
+            0 -> break
+            else -> println("Пожалуйста, укажите номер действия, которое вы хотите выполнить")
+        }
     }
-
 }
