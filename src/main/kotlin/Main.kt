@@ -1,6 +1,7 @@
 import java.io.File
 
 private const val NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD = 3
+private const val NUMBER_OF_ANSWERS = 4
 
 data class Word(
     val original: String,
@@ -30,7 +31,61 @@ fun main() {
         )
         val input = readln().toIntOrNull()
         when (input) {
-            1 -> println("Вы выбрали 1 - Учить слова")
+            1 -> {
+                while (true) {
+                    if (dictionary.any { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }) {
+                        val allWordsToLearn =
+                            dictionary.filter { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
+
+                        allWordsToLearn.forEach {
+                            println(it.original)
+
+                            val wordsInQuestion =
+                                ((allWordsToLearn - it).shuffled().take(NUMBER_OF_ANSWERS - 1) + listOf(it)).shuffled()
+
+                            wordsInQuestion.forEachIndexed {id, word ->
+                                println("${id+1} - ${word.translate}")
+                            }
+                            readln()
+                        }
+                    } else {
+                        println("Вы выучили все слова.")
+                        break
+                    }
+                }
+
+//                while (true) {
+//                    if (dictionary.any { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }) {
+//                        val wordsToLearn =
+//                            dictionary.filter { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
+//
+//                        wordsToLearn.forEach {
+//                            println(it.original)
+//
+//                            val correctAnswer = listOf(it.translate)
+//                            val wordsToLearnTranslations =
+//                                (wordsToLearn.map { it.translate } - correctAnswer).shuffled()
+//                            val otherTranslations = (dictionary - wordsToLearn).map { it.translate }.shuffled()
+//                            val allAnswers = correctAnswer + wordsToLearnTranslations + otherTranslations
+//
+//                            allAnswers.take(NUMBER_OF_ANSWERS).shuffled().forEachIndexed { id, translation ->
+//                                println("${id+1} - $translation")
+//                            }
+//
+//                            println("\n0 - Вернуться в меню")
+//                            print("Ответ: ")
+//                            val input = readln().toIntOrNull()
+//                            if (input == 0) return
+//                        }
+//                        println()
+//
+//                    } else {
+//                        println("Вы выучили все слова.")
+//                        break
+//                    }
+//                }
+            }
+
             2 -> {
                 val numberOfLearnedWords =
                     dictionary.filter { it.correctAnswersCount >= NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }

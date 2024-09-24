@@ -1,10 +1,10 @@
 people|люди|0
 family|семья|0
 woman|женщина|1
-man|мужчина|1
+man|мужчина|2
 girl|девочка|2
 boy|мальчик|2
-child|ребёнок|3
-friend|друг|3
+child|ребёнок|4
+friend|друг|4
 husband|муж|4
 wife|жена|4
