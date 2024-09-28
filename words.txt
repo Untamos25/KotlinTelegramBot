@@ -1,9 +1,9 @@
 people|люди|0
 family|семья|0
-woman|женщина|1
-man|мужчина|2
-girl|девочка|2
-boy|мальчик|2
+woman|женщина|4
+man|мужчина|4
+girl|девочка|4
+boy|мальчик|4
 child|ребёнок|4
 friend|друг|4
 husband|муж|4

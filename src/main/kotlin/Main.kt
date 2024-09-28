@@ -33,57 +33,41 @@ fun main() {
         when (input) {
             1 -> {
                 while (true) {
-                    if (dictionary.any { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }) {
-                        val allWordsToLearn =
-                            dictionary.filter { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
+                    val unlearnedWords =
+                        dictionary.filter { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
 
-                        allWordsToLearn.forEach {
-                            println(it.original)
+                    if (unlearnedWords.isNotEmpty()) {
+                        if (unlearnedWords.size >= NUMBER_OF_ANSWERS) {
+                            val wordsForQuestion = unlearnedWords.shuffled().take(NUMBER_OF_ANSWERS)
 
-                            val wordsInQuestion =
-                                ((allWordsToLearn - it).shuffled().take(NUMBER_OF_ANSWERS - 1) + listOf(it)).shuffled()
+                            println(wordsForQuestion.random().original)
 
-                            wordsInQuestion.forEachIndexed {id, word ->
-                                println("${id+1} - ${word.translate}")
+                            wordsForQuestion.forEachIndexed { id, word ->
+                                println("${id + 1} - ${word.translate}")
                             }
-                            readln()
+                        } else {
+                            println(unlearnedWords.random().original)
+
+                            val wordsForQuestion = (unlearnedWords + dictionary
+                                .filter { it.correctAnswersCount >= NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
+                                .shuffled()
+                                .take(NUMBER_OF_ANSWERS - unlearnedWords.size)
+                                    ).shuffled()
+
+                            wordsForQuestion.forEachIndexed { id, word ->
+                                println("${id + 1} - ${word.translate}")
+                            }
                         }
+
+                        println("\n0 - Выход в меню")
+                        val input = readln().toIntOrNull()
+                        if (input == 0) break
+
                     } else {
                         println("Вы выучили все слова.")
                         break
                     }
                 }
-
-//                while (true) {
-//                    if (dictionary.any { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }) {
-//                        val wordsToLearn =
-//                            dictionary.filter { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
-//
-//                        wordsToLearn.forEach {
-//                            println(it.original)
-//
-//                            val correctAnswer = listOf(it.translate)
-//                            val wordsToLearnTranslations =
-//                                (wordsToLearn.map { it.translate } - correctAnswer).shuffled()
-//                            val otherTranslations = (dictionary - wordsToLearn).map { it.translate }.shuffled()
-//                            val allAnswers = correctAnswer + wordsToLearnTranslations + otherTranslations
-//
-//                            allAnswers.take(NUMBER_OF_ANSWERS).shuffled().forEachIndexed { id, translation ->
-//                                println("${id+1} - $translation")
-//                            }
-//
-//                            println("\n0 - Вернуться в меню")
-//                            print("Ответ: ")
-//                            val input = readln().toIntOrNull()
-//                            if (input == 0) return
-//                        }
-//                        println()
-//
-//                    } else {
-//                        println("Вы выучили все слова.")
-//                        break
-//                    }
-//                }
             }
 
             2 -> {
