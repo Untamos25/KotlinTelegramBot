@@ -36,37 +36,29 @@ fun main() {
                     val unlearnedWords =
                         dictionary.filter { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
 
-                    if (unlearnedWords.isNotEmpty()) {
-                        if (unlearnedWords.size >= NUMBER_OF_ANSWERS) {
-                            val wordsForQuestion = unlearnedWords.shuffled().take(NUMBER_OF_ANSWERS)
-
-                            println(wordsForQuestion.random().original)
-
-                            wordsForQuestion.forEachIndexed { id, word ->
-                                println("${id + 1} - ${word.translate}")
-                            }
-                        } else {
-                            println(unlearnedWords.random().original)
-
-                            val wordsForQuestion = (unlearnedWords + dictionary
-                                .filter { it.correctAnswersCount >= NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
-                                .shuffled()
-                                .take(NUMBER_OF_ANSWERS - unlearnedWords.size)
-                                    ).shuffled()
-
-                            wordsForQuestion.forEachIndexed { id, word ->
-                                println("${id + 1} - ${word.translate}")
-                            }
-                        }
-
-                        println("\n0 - Выход в меню")
-                        val input = readln().toIntOrNull()
-                        if (input == 0) break
-
-                    } else {
+                    if (unlearnedWords.isEmpty()) {
                         println("Вы выучили все слова.")
                         break
                     }
+
+                    var wordsForQuestion = unlearnedWords.shuffled().take(NUMBER_OF_ANSWERS)
+                    val rightAnswer = wordsForQuestion.random()
+
+                    if (wordsForQuestion.size < NUMBER_OF_ANSWERS) {
+                        val learnedWords = dictionary
+                            .filter { it.correctAnswersCount >= NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
+                            .shuffled()
+                        wordsForQuestion =
+                            (wordsForQuestion + learnedWords.take(NUMBER_OF_ANSWERS - wordsForQuestion.size)).shuffled()
+                    }
+
+                    println(rightAnswer.original)
+                    wordsForQuestion.forEachIndexed { id, word ->
+                        println("${id + 1} - ${word.translate}")
+                    }
+                    println("\n0 - Выход в меню")
+                    val input = readln().toIntOrNull()
+                    if (input == 0) break
                 }
             }
 
