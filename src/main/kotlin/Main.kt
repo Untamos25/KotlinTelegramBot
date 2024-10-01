@@ -1,6 +1,7 @@
 import java.io.File
 
 private const val NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD = 3
+private const val NUMBER_OF_ANSWERS = 4
 
 data class Word(
     val original: String,
@@ -30,7 +31,37 @@ fun main() {
         )
         val input = readln().toIntOrNull()
         when (input) {
-            1 -> println("Вы выбрали 1 - Учить слова")
+            1 -> {
+                while (true) {
+                    val unlearnedWords =
+                        dictionary.filter { it.correctAnswersCount < NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
+
+                    if (unlearnedWords.isEmpty()) {
+                        println("Вы выучили все слова.")
+                        break
+                    }
+
+                    var wordsForQuestion = unlearnedWords.shuffled().take(NUMBER_OF_ANSWERS)
+                    val rightAnswer = wordsForQuestion.random()
+
+                    if (wordsForQuestion.size < NUMBER_OF_ANSWERS) {
+                        val learnedWords = dictionary
+                            .filter { it.correctAnswersCount >= NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
+                            .shuffled()
+                        wordsForQuestion =
+                            (wordsForQuestion + learnedWords.take(NUMBER_OF_ANSWERS - wordsForQuestion.size)).shuffled()
+                    }
+
+                    println(rightAnswer.original)
+                    wordsForQuestion.forEachIndexed { id, word ->
+                        println("${id + 1} - ${word.translate}")
+                    }
+                    println("\n0 - Выход в меню")
+                    val input = readln().toIntOrNull()
+                    if (input == 0) break
+                }
+            }
+
             2 -> {
                 val numberOfLearnedWords =
                     dictionary.filter { it.correctAnswersCount >= NUMBER_OF_CORRECT_REPETITIONS_TO_LEARN_WORD }
