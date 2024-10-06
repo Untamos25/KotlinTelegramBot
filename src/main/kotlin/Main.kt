@@ -6,8 +6,13 @@ private const val NUMBER_OF_ANSWERS = 4
 data class Word(
     val original: String,
     val translate: String,
-    val correctAnswersCount: Int = 0
+    var correctAnswersCount: Int = 0
 )
+
+fun saveDictionary(dictionary: List<Word>, file: File) {
+    val lines = dictionary.map { "${it.original}|${it.translate}|${it.correctAnswersCount}" }
+    file.writeText(lines.joinToString("\n"))
+}
 
 fun main() {
 
@@ -52,13 +57,33 @@ fun main() {
                             (wordsForQuestion + learnedWords.take(NUMBER_OF_ANSWERS - wordsForQuestion.size)).shuffled()
                     }
 
+                    val rightAnswerIndex = wordsForQuestion.indexOfFirst { it.translate == rightAnswer.translate } + 1
+
                     println(rightAnswer.original)
                     wordsForQuestion.forEachIndexed { id, word ->
                         println("${id + 1} - ${word.translate}")
                     }
                     println("\n0 - Выход в меню")
+
                     val input = readln().toIntOrNull()
-                    if (input == 0) break
+                    when (input) {
+                        in 1..NUMBER_OF_ANSWERS -> {
+                            if (input == rightAnswerIndex) {
+                                println("Правильно!")
+                                val wordIndexInDictionary = dictionary.indexOf(rightAnswer)
+                                dictionary[wordIndexInDictionary].correctAnswersCount++
+                                saveDictionary(dictionary, wordsFile)
+                            }
+                            else println("Неправильно - ${rightAnswer.original} [${rightAnswer.translate}]")
+                        }
+
+                        0 -> break
+                        else -> println(
+                            "Для выбора варианта ответа введите число от 1 до $NUMBER_OF_ANSWERS. " +
+                                    "Или введите 0 для выхода в меню."
+                        )
+                    }
+                    println()
                 }
             }
 
