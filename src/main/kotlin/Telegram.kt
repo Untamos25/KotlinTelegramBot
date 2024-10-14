@@ -3,6 +3,8 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
+private const val NOT_FOUND = -1
+
 fun main(args: Array<String>) {
 
     val botToken = args[0]
@@ -12,10 +14,10 @@ fun main(args: Array<String>) {
         Thread.sleep(2000)
         val updates: String = getUpdates(botToken, updateId)
         println(updates)
-        val startUpdateId = updates.lastIndexOf("update_id") + 11
+        val startUpdateId = updates.lastIndexOf("update_id")
         val endUpdateId = updates.lastIndexOf(",\n\"message\"")
-        if (startUpdateId == -1 || endUpdateId == -1) continue
-        val updateIdString = updates.substring(startUpdateId, endUpdateId)
+        if (startUpdateId == NOT_FOUND || endUpdateId == NOT_FOUND) continue
+        val updateIdString = updates.substring(startUpdateId + 11, endUpdateId)
         updateId = updateIdString.toInt() + 1
     }
 }
