@@ -3,20 +3,30 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
+private const val NOT_FOUND = -1
+
 fun main(args: Array<String>) {
 
     val botToken = args[0]
-    val urlGetMe = "https://api.telegram.org/bot$botToken/getMe"
-    val urlGetUpdates = "https://api.telegram.org/bot$botToken/getUpdates"
+    var updateId = 0
 
+    while (true) {
+        Thread.sleep(2000)
+        val updates: String = getUpdates(botToken, updateId)
+        println(updates)
+        val startUpdateId = updates.lastIndexOf("update_id")
+        val endUpdateId = updates.lastIndexOf(",\n\"message\"")
+        if (startUpdateId == NOT_FOUND || endUpdateId == NOT_FOUND) continue
+        val updateIdString = updates.substring(startUpdateId + 11, endUpdateId)
+        updateId = updateIdString.toInt() + 1
+    }
+}
+
+fun getUpdates(botToken: String, updateId: Int): String {
+    val urlGetUpdates = "https://api.telegram.org/bot$botToken/getUpdates?offset=$updateId"
     val client: HttpClient = HttpClient.newBuilder().build()
-    val request1: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetMe)).build()
-    val request2: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
+    val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
+    val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
 
-    val response1: HttpResponse<String> = client.send(request1, HttpResponse.BodyHandlers.ofString())
-    val response2: HttpResponse<String> = client.send(request2, HttpResponse.BodyHandlers.ofString())
-
-    println(response1.body())
-    println()
-    println(response2.body())
+    return response.body()
 }
