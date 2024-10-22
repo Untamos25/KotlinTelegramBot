@@ -19,11 +19,11 @@ fun main(args: Array<String>) {
 
         updateId = updateIdToRegex.find(updates)?.groups?.get(1)?.value?.toInt()?.plus(1) ?: continue
         val text = messageToRegex.find(updates)?.groups?.get(1)?.value
-        val chatId = chatIdToRegex.find(updates)?.groups?.get(1)?.value?.toLong()
+        val chatId = chatIdToRegex.find(updates)?.groups?.get(1)?.value?.toLongOrNull() ?: continue
         val data = dataToRegex.find(updates)?.groups?.get(1)?.value
 
-        if (chatId != null && text?.lowercase() == "/start") telegramBotService.sendMenu(chatId)
-        if (chatId != null && data?.lowercase() == "statistics_clicked") telegramBotService.sendMessage(
+        if (text?.lowercase() == "/start") telegramBotService.sendMenu(chatId)
+        if (data?.lowercase() == "statistics_clicked") telegramBotService.sendMessage(
             chatId,
             "Выучено 10 из 10 слов | 100%"
         )
