@@ -23,6 +23,7 @@ fun main(args: Array<String>) {
         val data = dataToRegex.find(updates)?.groups?.get(1)?.value
 
         if (text?.lowercase() == "/start") telegramBotService.sendMenu(chatId)
+
         if (data?.lowercase() == STATISTICS_CALLBACK) {
             val statistics = trainer.getStatistics()
             val progress = "Выучено ${statistics.numberOfLearnedWords} из ${statistics.sizeOfDictionary} | " +
@@ -30,5 +31,18 @@ fun main(args: Array<String>) {
 
             telegramBotService.sendMessage(chatId, progress)
         }
+
+        if (data?.lowercase() == LEARN_WORDS_CALLBACK) {
+            checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+        }
+    }
+}
+
+private fun checkNextQuestionAndSend(trainer: LearnWordsTrainer, telegramBotService: TelegramBotService, chatId: Long) {
+    val nextQuestion = trainer.getNextQuestion()
+    if (nextQuestion == null) {
+        telegramBotService.sendMessage(chatId, "Вы выучили все слова в базе")
+    } else {
+        telegramBotService.sendQuestion(chatId, nextQuestion)
     }
 }
