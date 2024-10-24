@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets
 
 const val LEARN_WORDS_CALLBACK = "learn_words_clicked"
 const val STATISTICS_CALLBACK = "statistics_clicked"
+const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 private const val URL_TELEGRAM_BOT = "https://api.telegram.org/bot"
 
 class TelegramBotService(private val botToken: String) {
@@ -46,6 +47,40 @@ class TelegramBotService(private val botToken: String) {
         """.trimIndent()
 
         return sendRequest(urlSendMenu, sendMenuBody)
+    }
+
+    fun sendQuestion(chatId: Long, question: Question): String {
+        val urlSendMessage = "$URL_TELEGRAM_BOT$botToken/sendMessage"
+        val keyboardButtons = question.wordsForQuestion.mapIndexed { index, word ->
+            mapOf(
+                "translation" to word.translate,
+                "callback_data" to "$CALLBACK_DATA_ANSWER_PREFIX${index + 1}"
+            )
+        }
+
+        val sendQuestionBody = """
+            {
+                "chat_id": $chatId,
+                "text": "${question.rightAnswer.original}",
+                "reply_markup": 
+                {
+                    "inline_keyboard": 
+                    [
+                        ${
+            keyboardButtons.chunked(2).joinToString(",")
+            { row ->
+                row.joinToString(",", prefix = "[", postfix = "]")
+                { button ->
+                    "{\"text\": \"${button["translation"]}\", \"callback_data\": \"${button["callback_data"]}\"}"
+                }
+            }
+        }
+                    ]
+                }
+            }
+        """.trimIndent()
+
+        return sendRequest(urlSendMessage, sendQuestionBody)
     }
 
     private fun sendRequest(url: String, body: String? = null): String {

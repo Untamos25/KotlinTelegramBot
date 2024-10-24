@@ -1,5 +1,7 @@
 import java.io.File
 
+const val NUMBER_OF_ANSWERS = 4
+
 data class Question(
     val wordsForQuestion: List<Word>,
     val rightAnswer: Word,

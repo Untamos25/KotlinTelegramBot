@@ -1,5 +1,3 @@
-const val NUMBER_OF_ANSWERS = 4
-
 fun Question.questionToString(): String {
     val variants = this.wordsForQuestion
         .mapIndexed { id, word -> "${id + 1} - ${word.translate}" }
