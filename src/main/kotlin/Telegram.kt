@@ -23,9 +23,12 @@ fun main(args: Array<String>) {
         val data = dataToRegex.find(updates)?.groups?.get(1)?.value
 
         if (text?.lowercase() == "/start") telegramBotService.sendMenu(chatId)
-        if (data?.lowercase() == "statistics_clicked") telegramBotService.sendMessage(
-            chatId,
-            "Выучено 10 из 10 слов | 100%"
-        )
+        if (data?.lowercase() == STATISTICS_CALLBACK) {
+            val statistics = trainer.getStatistics()
+            val progress = "Выучено ${statistics.numberOfLearnedWords} из ${statistics.sizeOfDictionary} | " +
+                    "${statistics.percentOfLearnedWords}%"
+
+            telegramBotService.sendMessage(chatId, progress)
+        }
     }
 }
