@@ -23,10 +23,12 @@ fun main(args: Array<String>) {
         val data = dataToRegex.find(updates)?.groups?.get(1)?.value
 
         if (text?.lowercase() == "/start") telegramBotService.sendMenu(chatId)
-        if (data?.lowercase() == STATISTICS_CALLBACK) telegramBotService.sendMessage(
-            chatId,
-            "Выучено ${trainer.getStatistics().numberOfLearnedWords} из ${trainer.getStatistics().sizeOfDictionary} |" +
-                    " ${trainer.getStatistics().percentOfLearnedWords}%"
-        )
+        if (data?.lowercase() == STATISTICS_CALLBACK) {
+            val statistics = trainer.getStatistics()
+            val progress = "Выучено ${statistics.numberOfLearnedWords} из ${statistics.sizeOfDictionary} | " +
+                    "${statistics.percentOfLearnedWords}%"
+
+            telegramBotService.sendMessage(chatId, progress)
+        }
     }
 }
