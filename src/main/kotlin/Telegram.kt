@@ -35,6 +35,20 @@ fun main(args: Array<String>) {
         if (data?.lowercase() == LEARN_WORDS_CALLBACK) {
             checkNextQuestionAndSend(trainer, telegramBotService, chatId)
         }
+
+        if (data?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true) {
+            val userAnswer = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
+            if (trainer.checkAnswer(userAnswer)) {
+                telegramBotService.sendMessage(chatId, "Правильно!")
+            } else {
+                val rightAnswer = trainer.question?.rightAnswer
+                telegramBotService.sendMessage(
+                    chatId, "Неправильно!\n" +
+                            "${rightAnswer?.original} – это ${rightAnswer?.translate}"
+                )
+            }
+            checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+        }
     }
 }
 
@@ -42,6 +56,7 @@ private fun checkNextQuestionAndSend(trainer: LearnWordsTrainer, telegramBotServ
     val nextQuestion = trainer.getNextQuestion()
     if (nextQuestion == null) {
         telegramBotService.sendMessage(chatId, "Вы выучили все слова в базе")
+        telegramBotService.sendMenu(chatId)
     } else {
         telegramBotService.sendQuestion(chatId, nextQuestion)
     }

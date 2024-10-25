@@ -1,6 +1,6 @@
-people|люди|0
-family|семья|0
-woman|женщина|3
+people|люди|3
+family|семья|2
+woman|женщина|2
 man|мужчина|3
 girl|девочка|3
 boy|мальчик|3
