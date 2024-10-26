@@ -20,7 +20,7 @@ data class Statistics(
 )
 
 class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
-    private var question: Question? = null
+    var question: Question? = null
     private val dictionary = loadDictionary()
 
     fun getStatistics(): Statistics {
