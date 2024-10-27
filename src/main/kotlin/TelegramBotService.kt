@@ -8,15 +8,24 @@ import java.net.http.HttpResponse
 const val LEARN_WORDS_CALLBACK = "learn_words_clicked"
 const val STATISTICS_CALLBACK = "statistics_clicked"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
+const val BACK_TO_MENU_CALLBACK = "back_to_menu_clicked"
 private const val URL_TELEGRAM_BOT = "https://api.telegram.org/bot"
 
 class TelegramBotService(private val botToken: String) {
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
+    fun decodeResponse(responseString: String): Response {
+        return json.decodeFromString(responseString)
+    }
+
     fun getUpdates(updateId: Long): String {
         val urlGetUpdates = "$URL_TELEGRAM_BOT$botToken/getUpdates?offset=$updateId"
         return sendRequest(urlGetUpdates)
     }
 
-    fun sendMessage(json: Json, chatId: Long?, botAnswer: String): String {
+    fun sendMessage(chatId: Long?, botAnswer: String): String {
         val urlSendMessage = "$URL_TELEGRAM_BOT$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,
@@ -27,7 +36,7 @@ class TelegramBotService(private val botToken: String) {
         return sendRequest(urlSendMessage, requestBodyString)
     }
 
-    fun sendMenu(json: Json, chatId: Long?): String {
+    fun sendMenu(chatId: Long?): String {
         val urlSendMenu = "$URL_TELEGRAM_BOT$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,
@@ -49,17 +58,25 @@ class TelegramBotService(private val botToken: String) {
         return sendRequest(urlSendMenu, requestBodyString)
     }
 
-    fun sendQuestion(json: Json, chatId: Long?, question: Question): String {
+    fun sendQuestion(chatId: Long?, question: Question): String {
         val urlSendMessage = "$URL_TELEGRAM_BOT$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,
             text = question.rightAnswer.original,
             replyMarkup = ReplyMarkup(
-                listOf(question.wordsForQuestion.mapIndexed { index, word ->
-                    InlineKeyboard(
-                        text = word.translation, callbackData = "$CALLBACK_DATA_ANSWER_PREFIX${index + 1}"
+                listOf(
+                    question.wordsForQuestion.mapIndexed { index, word ->
+                        InlineKeyboard(
+                            text = word.translation, callbackData = "$CALLBACK_DATA_ANSWER_PREFIX${index + 1}"
+                        )
+                    },
+                    listOf(
+                        InlineKeyboard(
+                            text = "В меню",
+                            callbackData = BACK_TO_MENU_CALLBACK
+                        )
                     )
-                })
+                )
             )
         )
         val requestBodyString = json.encodeToString(requestBody)
