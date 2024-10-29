@@ -68,53 +68,70 @@ fun main(args: Array<String>) {
     var lastUpdateId = 0L
 
     val telegramBotService = TelegramBotService(botToken)
-    val trainer = LearnWordsTrainer()
+    val trainers = HashMap<Long, LearnWordsTrainer>()
 
     while (true) {
         Thread.sleep(2000)
 
         val responseString: String = telegramBotService.getUpdates(lastUpdateId)
         println(responseString)
+
         val response: Response = telegramBotService.decodeResponse(responseString)
-        val updates = response.result
-        val firstUpdate = updates.firstOrNull() ?: continue
-        val updateId = firstUpdate.updateId
-        lastUpdateId = updateId + 1
+        if (response.result.isEmpty()) continue
 
-        val text = firstUpdate.message?.text
-        val chatId = firstUpdate.message?.chat?.id ?: firstUpdate.callbackQuery?.message?.chat?.id
-        val data = firstUpdate.callbackQuery?.data
+        val sortedUpdates = response.result.sortedBy { it.updateId }
+        sortedUpdates.forEach { handleUpdate(it, telegramBotService, trainers) }
+        lastUpdateId = sortedUpdates.last().updateId + 1
+    }
+}
 
-        if (text?.lowercase() == "/start") telegramBotService.sendMenu(chatId)
+fun handleUpdate(
+    update: Update,
+    telegramBotService: TelegramBotService,
+    trainers: HashMap<Long, LearnWordsTrainer>) {
 
-        if (data?.lowercase() == STATISTICS_CALLBACK) {
-            val statistics = trainer.getStatistics()
-            val progress = "Выучено ${statistics.numberOfLearnedWords} из ${statistics.sizeOfDictionary} | " +
-                    "${statistics.percentOfLearnedWords}%"
+    val text = update.message?.text
+    val chatId = update.message?.chat?.id ?: update.callbackQuery?.message?.chat?.id ?: return
+    val data = update.callbackQuery?.data
 
-            telegramBotService.sendMessage(chatId, progress)
+    val trainer = trainers.getOrPut(chatId) {LearnWordsTrainer("$chatId.txt")}
+
+    if (text?.lowercase() == "/start") telegramBotService.sendMenu(chatId)
+
+    if (data == STATISTICS_CALLBACK) {
+        val statistics = trainer.getStatistics()
+        val progress = "Выучено ${statistics.numberOfLearnedWords} из ${statistics.sizeOfDictionary} | " +
+                "${statistics.percentOfLearnedWords}%"
+
+        telegramBotService.sendMessage(chatId, progress)
+    }
+
+    if (data == LEARN_WORDS_CALLBACK) {
+        checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+    }
+
+    if (data?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true) {
+        val userAnswer = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
+        if (trainer.checkAnswer(userAnswer)) {
+            telegramBotService.sendMessage(chatId, "Правильно!")
+        } else {
+            val rightAnswer = trainer.question?.rightAnswer
+            telegramBotService.sendMessage(
+                chatId, "Неправильно!\n${rightAnswer?.original} – это ${rightAnswer?.translation}"
+            )
         }
+        checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+    }
 
-        if (data?.lowercase() == LEARN_WORDS_CALLBACK) {
-            checkNextQuestionAndSend(trainer, telegramBotService, chatId)
-        }
+    if (data == BACK_TO_MENU_CALLBACK) {
+        telegramBotService.sendMenu(chatId)
+    }
 
-        if (data?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true) {
-            val userAnswer = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
-            if (trainer.checkAnswer(userAnswer)) {
-                telegramBotService.sendMessage(chatId, "Правильно!")
-            } else {
-                val rightAnswer = trainer.question?.rightAnswer
-                telegramBotService.sendMessage(
-                    chatId, "Неправильно!\n${rightAnswer?.original} – это ${rightAnswer?.translation}"
-                )
-            }
-            checkNextQuestionAndSend(trainer, telegramBotService, chatId)
-        }
+    if (data == RESET_PROGRESS_CLICKED) {
+        trainer.resetProgress()
+        val resetProgressMessage = "Прогресс сброшен."
 
-        if (data?.lowercase() == BACK_TO_MENU_CALLBACK) {
-            telegramBotService.sendMenu(chatId)
-        }
+        telegramBotService.sendMessage(chatId, resetProgressMessage)
     }
 }
 
