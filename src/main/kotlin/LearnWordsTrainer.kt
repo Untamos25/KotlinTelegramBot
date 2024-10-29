@@ -1,3 +1,4 @@
+import kotlinx.serialization.Serializable
 import java.io.File
 
 const val NUMBER_OF_ANSWERS = 4
@@ -7,9 +8,10 @@ data class Question(
     val rightAnswer: Word,
 )
 
+@Serializable
 data class Word(
     val original: String,
-    val translate: String,
+    val translation: String,
     var correctAnswersCount: Int = 0
 )
 
@@ -22,7 +24,6 @@ data class Statistics(
 class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
     var question: Question? = null
     private val dictionary = loadDictionary()
-
     fun getStatistics(): Statistics {
         val numberOfLearnedWords =
             dictionary.filter { it.correctAnswersCount >= learnedAnswerCount }.size
@@ -54,7 +55,7 @@ class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
     fun checkAnswer(input: Int?): Boolean {
         return question?.let { question ->
             val rightAnswerIndex =
-                question.wordsForQuestion.indexOfFirst { it.translate == question.rightAnswer.translate } + 1
+                question.wordsForQuestion.indexOfFirst { it.translation == question.rightAnswer.translation } + 1
             if (input == rightAnswerIndex) {
                 val wordIndexInDictionary = dictionary.indexOf(question.rightAnswer)
                 dictionary[wordIndexInDictionary].correctAnswersCount++
@@ -76,7 +77,7 @@ class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
                 dictionary.add(
                     Word(
                         original = splitline[0],
-                        translate = splitline[1],
+                        translation = splitline[1],
                         correctAnswersCount = splitline[2].toIntOrNull() ?: 0
                     )
                 )
@@ -91,7 +92,7 @@ class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
         val wordsFile = File("words.txt")
         wordsFile.writeText("")
         for (word in dictionary) {
-            wordsFile.appendText("${word.original}|${word.translate}|${word.correctAnswersCount}\n")
+            wordsFile.appendText("${word.original}|${word.translation}|${word.correctAnswersCount}\n")
         }
     }
 }
