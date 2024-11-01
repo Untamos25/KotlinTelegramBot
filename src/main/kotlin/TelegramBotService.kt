@@ -9,12 +9,11 @@ const val LEARN_WORDS_CALLBACK = "learn_words_clicked"
 const val STATISTICS_CALLBACK = "statistics_clicked"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 const val BACK_TO_MENU_CALLBACK = "back_to_menu_clicked"
+const val RESET_PROGRESS_CLICKED = "reset_progress_clicked"
 private const val URL_TELEGRAM_BOT = "https://api.telegram.org/bot"
 
 class TelegramBotService(private val botToken: String) {
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
+    private val json = Json { ignoreUnknownKeys = true }
 
     fun decodeResponse(responseString: String): Response {
         return json.decodeFromString(responseString)
@@ -48,6 +47,7 @@ class TelegramBotService(private val botToken: String) {
                     ),
                     listOf(
                         InlineKeyboard(text = "Статистика", callbackData = STATISTICS_CALLBACK),
+                        InlineKeyboard(text = "Сбросить прогресс", callbackData = RESET_PROGRESS_CLICKED),
                     )
                 )
             )

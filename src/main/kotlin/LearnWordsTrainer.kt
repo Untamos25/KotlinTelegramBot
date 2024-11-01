@@ -21,9 +21,13 @@ data class Statistics(
     val percentOfLearnedWords: Int
 )
 
-class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
+class LearnWordsTrainer(
+    private val fileName: String = "words.txt",
+    private val learnedAnswerCount: Int = 3
+) {
     var question: Question? = null
     private val dictionary = loadDictionary()
+
     fun getStatistics(): Statistics {
         val numberOfLearnedWords =
             dictionary.filter { it.correctAnswersCount >= learnedAnswerCount }.size
@@ -59,7 +63,7 @@ class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
             if (input == rightAnswerIndex) {
                 val wordIndexInDictionary = dictionary.indexOf(question.rightAnswer)
                 dictionary[wordIndexInDictionary].correctAnswersCount++
-                saveDictionary(dictionary)
+                saveDictionary()
                 true
             } else {
                 false
@@ -68,9 +72,12 @@ class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
     }
 
     fun loadDictionary(): List<Word> {
-        val dictionary = mutableListOf<Word>()
-        val wordsFile = File("words.txt")
+        val wordsFile = File(fileName)
+        if (!wordsFile.exists()) {
+            File("words.txt").copyTo(wordsFile)
+        }
 
+        val dictionary = mutableListOf<Word>()
         wordsFile.readLines().forEach {
             val splitline = it.split("|")
             if (splitline.size == 3 && splitline.all { it.isNotBlank() }) {
@@ -88,11 +95,16 @@ class LearnWordsTrainer(private val learnedAnswerCount: Int = 3) {
         return dictionary
     }
 
-    fun saveDictionary(dictionary: List<Word>) {
-        val wordsFile = File("words.txt")
+    fun saveDictionary() {
+        val wordsFile = File(fileName)
         wordsFile.writeText("")
         for (word in dictionary) {
             wordsFile.appendText("${word.original}|${word.translation}|${word.correctAnswersCount}\n")
         }
+    }
+
+    fun resetProgress() {
+        dictionary.forEach { it.correctAnswersCount = 0 }
+        saveDictionary()
     }
 }
